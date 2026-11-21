@@ -6,20 +6,20 @@ let white = [' ' '\t']+
 let digit = ['0'-'9']
 let int = '-'? digit+
 let letter = ['a'-'z' 'A'-'Z']
-(* Allow names such as x1 and my_pair *)
+(* allow names such as x1 and my_pair *)
 let id = (letter | '_') (letter | digit | '_')*
 let newline = "\r\n" | '\n' | '\r'
 
 rule read =
   parse
   | white { read lexbuf }
-  (* Handle line endings and update error positions *)
+  (* handle line endings and update error positions *)
   | newline { Lexing.new_line lexbuf; read lexbuf }
 
   | "True" { TRUE }
   | "False" { FALSE }
 
-  (* Boolean operators *)
+  (* boolean operators *)
   | "And" { AND }
   | "Or" { OR }
   | "Not" { NOT }
@@ -29,7 +29,7 @@ rule read =
   | "(" { LPAREN }
   | ")" { RPAREN }
 
-  (* Pair syntax *)
+  (* pair syntax *)
   | "," { COMMA }
   | "First" { FIRST }
   | "Second" { SECOND }
@@ -41,13 +41,13 @@ rule read =
   | "Then" { THEN }
   | "Else" { ELSE }
 
-  (* Function syntax *)
+  (* function syntax *)
   | "Fun" { FUN }
   | "Fix" { FIX }
   | "." { DOT }
   | "->" { ARROW }
 
-  (* Accept the mathematical symbols from the handout *)
+  (* accept the mathematical symbols from the handout *)
   | "→" { ARROW }
   | "×" { TIMES }
 
@@ -55,7 +55,7 @@ rule read =
   | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof { EOF }
 
-  (* Report any unsupported character *)
+  (* report any unsupported character *)
   | _ {
       failwith
         (Printf.sprintf "unexpected character %S"

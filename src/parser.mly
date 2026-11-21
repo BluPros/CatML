@@ -1,5 +1,10 @@
 %{
 open Lang
+
+(* attach the source range supplied by menhir *)
+
+let located start_pos end_pos e =
+  Located ({ start_pos; end_pos }, e)
 %}
 
 %token <int> INT
@@ -18,13 +23,13 @@ open Lang
 %token ELSE
 %token EOF
 
-/* Boolean operators */
+/* boolean operators */
 %token AND OR NOT
 
-/* Pair syntax */
+/* pair syntax */
 %token COMMA FIRST SECOND
 
-/* Function syntax */
+/* function syntax */
 %token FUN FIX DOT ARROW
 
 %start <Lang.expr> prog
@@ -35,75 +40,83 @@ prog:
   | e = expr; EOF { e }
   ;
 
-/* Let, If, and function bodies extend to the right */
+/* let, if, and function bodies extend to the right */
 expr:
   | LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr
-      { Let(x,e1,e2) }
+      { located $startpos $endpos (Let (x, e1, e2)) }
   | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr
-      { If(e1,e2,e3) }
+      { located $startpos $endpos (If (e1, e2, e3)) }
   | FUN; x = ID; ARROW; body = expr
-      { Fun(x,body) }
+      { located $startpos $endpos (Fun (x, body)) }
   | FIX; f = ID; DOT; x = ID; ARROW; body = expr
-      { Fix(f,x,body) }
+      { located $startpos $endpos (Fix (f, x, body)) }
   | e = or_expr { e }
   ;
 
-/* Or has lower precedence than And */
+/* or has lower precedence than and */
 or_expr:
   | e1 = or_expr; OR; e2 = and_expr
-      { Or(e1,e2) }
+      { located $startpos $endpos (Or (e1, e2)) }
   | e = and_expr { e }
   ;
 
 and_expr:
   | e1 = and_expr; AND; e2 = equal_expr
-      { And(e1,e2) }
+      { located $startpos $endpos (And (e1, e2)) }
   | e = equal_expr { e }
   ;
 
-/* Use parentheses when nesting equality expressions */
+/* use parentheses when nesting equality expressions */
 equal_expr:
   | e1 = add_expr; EQUALS; e2 = add_expr
-      { Equal(e1,e2) }
+      { located $startpos $endpos (Equal (e1, e2)) }
   | e = add_expr { e }
   ;
 
-/* Addition and multiplication group to the left */
+/* addition and multiplication group to the left */
 add_expr:
   | e1 = add_expr; PLUS; e2 = mult_expr
-      { Plus(e1,e2) }
+      { located $startpos $endpos (Plus (e1, e2)) }
   | e = mult_expr { e }
   ;
 
 mult_expr:
   | e1 = mult_expr; TIMES; e2 = app_expr
-      { Mult(e1,e2) }
+      { located $startpos $endpos (Mult (e1, e2)) }
   | e = app_expr { e }
   ;
 
-/* Application groups to the left */
+/* application groups to the left */
 /* f x y means (f x) y */
 app_expr:
   | e1 = app_expr; e2 = prefix_expr
-      { App(e1,e2) }
+      { located $startpos $endpos (App (e1, e2)) }
   | e = prefix_expr { e }
   ;
 
-/* Prefix operators bind more tightly than application */
+/* prefix operators bind more tightly than application */
 prefix_expr:
-  | NOT; e = prefix_expr { Not e }
-  | FIRST; e = prefix_expr { First e }
-  | SECOND; e = prefix_expr { Second e }
+  | NOT; e = prefix_expr
+      { located $startpos $endpos (Not e) }
+  | FIRST; e = prefix_expr
+      { located $startpos $endpos (First e) }
+  | SECOND; e = prefix_expr
+      { located $startpos $endpos (Second e) }
   | e = atom { e }
   ;
 
-/* Parentheses contain grouped expressions or pairs */
+/* parentheses contain grouped expressions or pairs */
 atom:
-  | i = INT { Int i }
-  | x = ID { Var x }
-  | TRUE { Bool true }
-  | FALSE { Bool false }
-  | LPAREN; e = expr; RPAREN { e }
+  | i = INT
+      { located $startpos $endpos (Int i) }
+  | x = ID
+      { located $startpos $endpos (Var x) }
+  | TRUE
+      { located $startpos $endpos (Bool true) }
+  | FALSE
+      { located $startpos $endpos (Bool false) }
+  | LPAREN; e = expr; RPAREN
+      { e }
   | LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN
-      { Pair(e1,e2) }
+      { located $startpos $endpos (Pair (e1, e2)) }
   ;

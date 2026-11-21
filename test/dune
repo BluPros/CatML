@@ -1,3 +1,9 @@
 (test
  (name tests)
+ (modules tests)
+ (libraries CatML))
+
+(test
+ (name extra_credit_tests)
+ (modules extra_credit_tests)
  (libraries CatML))
