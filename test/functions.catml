@@ -1,0 +1,2 @@
+Let addOne = Fun x -> x + 1 In
+addOne 10

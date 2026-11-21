@@ -1,5 +1,13 @@
-(library (name CatML))
+(library
+ (name CatML)
+ (modules lang lexer parser))
 
-(menhir (modules parser))
+(executable
+ (name main)
+ (modules main)
+ (libraries CatML))
+
+(menhir
+ (modules parser))
 
 (ocamllex lexer)

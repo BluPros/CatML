@@ -1,0 +1,5 @@
+Let factorial =
+  Fix f . n ->
+    If n = 0 Then 1 Else n * (f (n + -1))
+In
+factorial 5

@@ -1,0 +1,3 @@
+Let x = 10 In
+Let f = Fun x -> x + 1 In
+(f 5) + x

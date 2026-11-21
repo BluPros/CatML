@@ -1,0 +1,3 @@
+Let makeAdder = Fun x -> Fun y -> x + y In
+Let addFive = makeAdder 5 In
+addFive 3
